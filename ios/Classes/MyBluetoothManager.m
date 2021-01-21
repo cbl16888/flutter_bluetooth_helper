@@ -24,6 +24,7 @@
 @property (nonatomic, copy) FlutterReply scanCallback;
 @property (nonatomic, copy) FlutterReply connectCallback;
 @property (nonatomic, copy) FlutterReply discoverServicesCallback;
+@property (nonatomic, assign) NSUInteger servicesCount;
 /** 记录读取的特征id */
 @property (nonatomic, copy) NSString *readCharacteristicId;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, CBCharacteristic *> *characteristicDict;
@@ -198,6 +199,7 @@
         return;
     }
     [MyLog log:@"onServicesDiscovered success %@", peripheral.services];
+    self.servicesCount = peripheral.services.count;
     for (CBService *service in peripheral.services) {
         [MyLog log:@"service %@", service];
         [service.peripheral discoverCharacteristics:nil forService:service];
@@ -205,6 +207,7 @@
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(CBService *)service error:(NSError *)error {
+    self.servicesCount -= 1;
     if (error != nil) {
         if (nil != self.discoverServicesCallback) {
             self.discoverServicesCallback([[BasicMessageChannelReply sharedReply] error:[NSString stringWithFormat:@"%ld", (long)error.code] message:@"discover characteristics for services error" data:error.userInfo]);
@@ -216,12 +219,13 @@
         [MyLog log:@"characteristic %@", characteristic];
         [self.characteristicDict setValue:characteristic forKey:characteristic.UUID.UUIDString];
     }
-    
-    if (nil != self.discoverServicesCallback) {
-        self.discoverServicesCallback([[BasicMessageChannelReply sharedReply] success:self.characteristicDict.allKeys]);
-        self.discoverServicesCallback = nil;
-    } else {
-        [[MyMethodRouter shared] callOnServicesDiscovered:peripheral.identifier.UUIDString data:self.characteristicDict.allKeys];
+    if (self.servicesCount == 0) {
+        if (nil != self.discoverServicesCallback) {
+            self.discoverServicesCallback([[BasicMessageChannelReply sharedReply] success:self.characteristicDict.allKeys]);
+            self.discoverServicesCallback = nil;
+        } else {
+            [[MyMethodRouter shared] callOnServicesDiscovered:peripheral.identifier.UUIDString data:self.characteristicDict.allKeys];
+        }
     }
 }
 
