@@ -51,6 +51,8 @@ final class MyBluetoothDevice {
 //                // 释放资源
 //                disconnect();
                 gatt.close();
+            } else if (status != 0) {
+                gatt.close();
             }
             MyMethodRouter.me().callOnDeviceStateChange(device.getAddress(), newState);
         }
