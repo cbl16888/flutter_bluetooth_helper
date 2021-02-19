@@ -9,7 +9,7 @@
 #import "BasicMessageChannelReply.h"
 #import "BluetoothConstants.h"
 #import "MyLog.h"
-#import "MyLocationManager.h"
+#import "KeepAliveManager.h"
 #import "MyBluetoothManager.h"
 
 @interface MyMethodRouter ()
@@ -65,17 +65,12 @@
         callback([reply success:[NSNumber numberWithBool:YES]]);
         return;
     }
-    if ([BluetoothConstantsMethodKeepAlive isEqualToString:method]) {
-        // iOS后台保活系统自动处理
-        callback([reply success:[NSNumber numberWithBool:YES]]);
-        return;
-    }
     if ([BluetoothConstantsMethodBluetoothIsEnable isEqualToString:method]) {
         callback([reply success:[NSNumber numberWithBool:[[MyBluetoothManager shared] isEnabled]]]);
         return;
     }
     if ([BluetoothConstantsMethodLocationIsEnable isEqualToString:method]) {
-        callback([reply success:[NSNumber numberWithBool:[[MyLocationManager shared] isEnabled]]]);
+        callback([reply success:[NSNumber numberWithBool:true]]);
         return;
     }
     if ([BluetoothConstantsMethodStartScan isEqualToString:method]) {
@@ -105,6 +100,13 @@
     }
     // 以下操作都必须传递键值对参数。
     NSDictionary<NSString *, id> *args = messageData[BluetoothConstantsKeyArgs];
+    if ([BluetoothConstantsMethodKeepAlive isEqualToString:method]) {
+        // iOS后台保活系统自动处理
+        BOOL isOpen = [args[@"isOpen"] boolValue];
+        [[KeepAliveManager shared] keepAliveWithOpen:isOpen];
+        callback([reply success:[NSNumber numberWithBool:YES]]);
+        return;
+    }
     // 设备标识所有操作都必须传递。
     NSString *deviceId = @"";
     id deviceIdObj = args[BluetoothConstantsKeyDeviceId];

@@ -103,8 +103,8 @@ class BluetoothHelper {
   }
 
   /// 保活
-  Future<bool> keepAlive() async {
-    Map _res = await callMethod("keepAlive");
+  Future<bool> keepAlive({bool isOpen = true}) async {
+    Map _res = await callMethod("keepAlive", {"isOpen": isOpen});
     bool _val = getResultData(_res);
     return _val;
   }

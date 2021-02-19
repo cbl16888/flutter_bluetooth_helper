@@ -1,5 +1,5 @@
 //
-//  MyLocationManager.h
+//  KeepAliveManager.h
 //  bluetooth_helper
 //
 //  Created by 陈柏伶 on 2020/6/13.
@@ -9,10 +9,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MyLocationManager : NSObject
+@interface KeepAliveManager : NSObject
 
 + (instancetype)shared;
-- (BOOL)isEnabled;
+- (void)keepAliveWithOpen:(BOOL)isOpen;
 
 @end
 
