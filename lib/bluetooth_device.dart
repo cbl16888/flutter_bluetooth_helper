@@ -140,6 +140,10 @@ class BluetoothDevice {
     }
   }
 
+  Future<bool> requestMtu([int desiredMtu = 200]) async {
+    return BluetoothHelper.me.requestMtu(this._deviceId, desiredMtu: desiredMtu);
+  }
+
   /// 发现所有服务特征码
   Future<List> discoverCharacteristics([int timeout = 3]) async {
     return BluetoothHelper.me.discoverCharacteristics(this._deviceId, timeout);

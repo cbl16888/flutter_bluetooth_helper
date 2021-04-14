@@ -142,6 +142,11 @@ final class MyMethodRouter implements BasicMessageChannel.MessageHandler<Object>
                 MyBluetoothManager.me().cacheDevice(_deviceId).connect(_timeout, _reply);
                 return;
             }
+            if ("requestMtu".equals(_method)) {
+                int desiredMtu = (int)_args.get("desiredMtu");
+                MyBluetoothManager.me().cacheDevice(_deviceId).requestMtu(desiredMtu, _reply);
+                return;
+            }
             if ("discoverServices".equals(_method)) {
                 Object _timeoutObj = _args.get("timeout");
                 int _timeout = null == _timeoutObj ? 3 : Integer.parseInt(_timeoutObj.toString());

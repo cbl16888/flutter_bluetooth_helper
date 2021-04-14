@@ -27,7 +27,7 @@ class _MyAppState extends State<MyApp> {
     if (Platform.isAndroid) {
 //      _device = BluetoothDevice.create("CC:98:3E:9B:60:0C", "ZLY_2003020101351");
       _device =
-          BluetoothDevice.create("D8:CB:BD:91:D5:D5", "ZLY_2003020101038");
+          BluetoothDevice.create("11:11:11:11:11:11", "ZLY_2003020101038");
     } else {
       _device = BluetoothDevice.create(
           "ED293FE6-090B-5EF3-23FE-E0551D06C2AD", "ZLY_2002020101020");
@@ -81,7 +81,7 @@ class _MyAppState extends State<MyApp> {
                   child: Text("scan"),
                   onPressed: () => BluetoothHelper.me
 //                      .scan(timeout: 15)
-                      .scan(deviceId: "E4:E6:CC:B5:49:DF", timeout: 15)
+                      .scan(deviceId: _device.deviceId, timeout: 15)
                       .then((List<BluetoothDevice> _res) {
                     for (BluetoothDevice _device in _res) {
                       print("scan device: $_device");
@@ -156,6 +156,18 @@ class _MyAppState extends State<MyApp> {
                   ]).then((_res) => print("write result: $_res")),
                 ),
               ],
+            ),
+            RaisedButton(
+              child: Text("requestMtu"),
+              onPressed: () => _device
+                  .requestMtu()
+                  .then((_res) => print("requestMtu result: $_res")),
+            ),
+            RaisedButton(
+              child: Text("CharacteristicNotification"),
+              onPressed: () => _device
+                  .setCharacteristicNotification(_readCharacteristic)
+                  .then((_res) => print("CharacteristicNotification result: $_res")),
             ),
           ],
         ),

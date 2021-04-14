@@ -152,6 +152,12 @@ class BluetoothHelper {
     return _val;
   }
 
+  Future<bool> requestMtu(String deviceId, {int desiredMtu = 200}) async {
+    Map _res = await callMethod("requestMtu", {"deviceId": deviceId, "desiredMtu": desiredMtu});
+    bool _val = getResultData(_res);
+    return _val;
+  }
+
   /// 获取连接状态
   Future<int> getDeviceState(String deviceId) async {
     Map _res = await callMethod("getDeviceState", {"deviceId": deviceId});

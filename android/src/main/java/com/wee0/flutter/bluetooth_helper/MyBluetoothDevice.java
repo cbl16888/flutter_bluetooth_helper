@@ -177,6 +177,30 @@ final class MyBluetoothDevice {
     }
 
     /**
+     * 设置mtu
+     *
+     * @param desiredMtu mtu大小。
+     * @param reply   回复对象
+     */
+    void requestMtu(int desiredMtu, IReply reply) {
+        if (null != this.currentReply) {
+            MyLog.debug("please wait for another task to complete.");
+            return;
+        }
+        if (!this.connected) {
+//            throw new IllegalStateException("please connect first!");
+            reply.error(MyBluetoothException.CODE_CONNECT_FIRST, "please connect first!");
+            return;
+        }
+        this.currentReply = reply;
+        boolean isSuccess = gatt1.requestMtu(desiredMtu);
+        if (null != currentReply) {
+            currentReply.success(isSuccess);
+            currentReply = null;
+        }
+    }
+
+    /**
      * 发现服务
      *
      * @param timeout 超时时间，单位：秒。
