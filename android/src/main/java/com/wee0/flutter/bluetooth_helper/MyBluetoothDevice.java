@@ -114,6 +114,15 @@ final class MyBluetoothDevice {
             MyLog.debug("onDescriptorWrite status: {}, descriptor: {}, gatt: {}, gatt1: {}", status, descriptor, gatt, gatt1);
             super.onDescriptorWrite(gatt, descriptor, status);
         }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            super.onMtuChanged(gatt, mtu, status);
+            if (null != currentReply) {
+                currentReply.success(true);
+                currentReply = null;
+            }
+        }
     };
 
     MyBluetoothDevice(BluetoothDevice bluetoothDevice) {
@@ -194,8 +203,8 @@ final class MyBluetoothDevice {
         }
         this.currentReply = reply;
         boolean isSuccess = gatt1.requestMtu(desiredMtu);
-        if (null != currentReply) {
-            currentReply.success(isSuccess);
+        if (null != currentReply && !isSuccess) {
+            currentReply.success(false);
             currentReply = null;
         }
     }
