@@ -132,9 +132,9 @@ class BluetoothHelper {
 
   /// 扫描设备，获取扫描结果。
   Future<List<BluetoothDevice>> scan(
-      {String deviceName, String deviceId, int timeout = 2}) async {
+      {String deviceName, String deviceId, int timeout = 2, String serviceId}) async {
     Map _res = await callMethod("startScan",
-        {"deviceName": deviceName, "deviceId": deviceId, "timeout": timeout});
+        {"deviceName": deviceName, "deviceId": deviceId, "timeout": timeout, "serviceId": serviceId});
     Map _deviceMap = getResultData(_res);
     if (null == _deviceMap || _deviceMap.isEmpty) return [];
     List<BluetoothDevice> _devices = _deviceMap.values

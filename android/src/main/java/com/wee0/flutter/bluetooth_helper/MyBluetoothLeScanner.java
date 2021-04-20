@@ -6,11 +6,13 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.os.ParcelUuid;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 自定义的蓝牙扫描器
@@ -86,7 +88,7 @@ final class MyBluetoothLeScanner {
         return this.scanData;
     }
 
-    void startScan(final String deviceName, final String deviceAddress, final int scanTimeout, final IReply reply) {
+    void startScan(final String deviceName, final String deviceAddress, final int scanTimeout, final IReply reply, final String serviceId) {
         if (this.scanning) {
             MyLog.debug("already scanning!");
             return;
@@ -118,7 +120,7 @@ final class MyBluetoothLeScanner {
                         MyLog.debug("callback request timeout.");
                         return;
                     }
-                    startScan(deviceName, deviceAddress, MyBluetoothLeScanner.this._scanTimeout, reply);
+                    startScan(deviceName, deviceAddress, MyBluetoothLeScanner.this._scanTimeout, reply, serviceId);
                 }
             })) {
                 _callbackRegTime = System.currentTimeMillis();
@@ -133,6 +135,10 @@ final class MyBluetoothLeScanner {
         ScanFilter.Builder _filterBuilder = new ScanFilter.Builder();
         if (null != deviceName) _filterBuilder.setDeviceName(deviceName);
         if (null != deviceAddress) _filterBuilder.setDeviceAddress(deviceAddress);
+        if (null != serviceId) {
+            _filterBuilder.setServiceUuid(ParcelUuid.fromString(serviceId));
+        }
+
         ScanFilter _scanFilter = _filterBuilder.build();
         _scanFilters.add(_scanFilter);
 

@@ -13,6 +13,7 @@ NSString *const BluetoothConstantsKeyCode = @"code";
 NSString *const BluetoothConstantsKeyMsg = @"message";
 NSString *const BluetoothConstantsKeyData = @"data";
 NSString *const BluetoothConstantsKeyDeviceId = @"deviceId";
+NSString *const BluetoothConstantsKeyServiceId = @"serviceId";
 NSString *const BluetoothConstantsKeyDeviceName = @"deviceName";
 NSString *const BluetoothConstantsKeyDeviceState = @"deviceState";
 NSString *const BluetoothConstantsKeyTimeout = @"timeout";

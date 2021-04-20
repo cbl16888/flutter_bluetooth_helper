@@ -55,7 +55,7 @@
     return self.isAuthorized;
 }
 
-- (void)startScan:(NSString *)deviceName deviceId:(NSString *)deviceId timeout:(int)timeout callback:(FlutterReply _Nonnull)callback {
+- (void)startScan:(NSString *)deviceName deviceId:(NSString *)deviceId timeout:(int)timeout callback:(FlutterReply _Nonnull)callback serviceId:(NSString * _Nullable)serviceId {
     if (![self isEnabled]) {
         [MyLog log:@"please turn on bluetooth."];
         return;
@@ -65,7 +65,11 @@
     self.scanCallback = callback;
     [self.scanData removeAllObjects];
     [self.scannedPeripheralDict removeAllObjects];
-    [self.centralManager scanForPeripheralsWithServices:nil options:nil];
+    NSArray<CBUUID *> *serviceUUIDs = nil;
+    if (serviceId != nil) {
+        serviceUUIDs = @[[CBUUID UUIDWithString:serviceId]];
+    }
+    [self.centralManager scanForPeripheralsWithServices:serviceUUIDs options:nil];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self callBackScanResult];
     });

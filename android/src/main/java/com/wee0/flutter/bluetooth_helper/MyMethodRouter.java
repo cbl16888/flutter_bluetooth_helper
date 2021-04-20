@@ -107,13 +107,15 @@ final class MyMethodRouter implements BasicMessageChannel.MessageHandler<Object>
                 String _deviceName = null;
                 String _deviceId = null;
                 int _scanTimeout = 0;
+                String _serviceId = null;
                 if (_messageData.containsKey(KEY_ARGS)) {
                     Map<String, Object> _args = (Map<String, Object>) _messageData.get(KEY_ARGS);
                     _deviceName = _args.containsKey("deviceName") ? (String) _args.get("deviceName") : null;
                     _deviceId = _args.containsKey("deviceId") ? (String) _args.get("deviceId") : null;
                     _scanTimeout = _args.containsKey("timeout") ? (int)_args.get("timeout") : 0;
+                    _serviceId = _args.containsKey("serviceId") ? (String) _args.get("deviceId") : null;
                 }
-                MyBluetoothManager.me().startScan(_deviceName, _deviceId, _scanTimeout, _reply);
+                MyBluetoothManager.me().startScan(_deviceName, _deviceId, _scanTimeout, _reply, _serviceId);
 //                _reply.success(true);
                 return;
             }

@@ -76,21 +76,29 @@
     if ([BluetoothConstantsMethodStartScan isEqualToString:method]) {
         NSString *deviceName;
         NSString *deviceId;
+        NSString *serviceId;
         id timeoutObj;
         if ([messageData.allKeys containsObject:BluetoothConstantsKeyArgs]) {
             NSDictionary<NSString *, id> *args = messageData[BluetoothConstantsKeyArgs];
             deviceName = [args.allKeys containsObject:BluetoothConstantsKeyDeviceName] ? args[BluetoothConstantsKeyDeviceName] : nil;
             deviceId = [args.allKeys containsObject:BluetoothConstantsKeyDeviceId] ? args[BluetoothConstantsKeyDeviceId] : nil;
             timeoutObj = [args.allKeys containsObject:BluetoothConstantsKeyTimeout] ? args[BluetoothConstantsKeyTimeout] : @10;
+            serviceId = [args.allKeys containsObject:BluetoothConstantsKeyServiceId] ? args[BluetoothConstantsKeyServiceId] : nil;
             if ([deviceId isKindOfClass:[NSNull class]]) {
                 deviceId = nil;
             }
             if ([deviceName isKindOfClass:[NSNull class]]) {
                 deviceName = nil;
             }
+            if ([deviceName isKindOfClass:[NSNull class]]) {
+                deviceName = nil;
+            }
+            if ([serviceId isKindOfClass:[NSNull class]]) {
+                serviceId = nil;
+            }
         }
         int timeout = [timeoutObj isKindOfClass:[NSNull class]] ? 10 : [timeoutObj intValue];
-        [[MyBluetoothManager shared] startScan:deviceName deviceId:deviceId timeout:timeout callback:callback];
+        [[MyBluetoothManager shared] startScan:deviceName deviceId:deviceId timeout:timeout callback:callback serviceId:serviceId];
         return;
     }
     if ([BluetoothConstantsMethodStopScan isEqualToString:method]) {

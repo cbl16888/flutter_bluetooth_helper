@@ -49,10 +49,16 @@ final class MyBluetoothDevice {
                     currentReply = null;
                 }
 //                // 释放资源
-//                disconnect();
-                gatt.close();
+                disconnect();
+//                gatt.close();
             } else if (status != 0) {
-                gatt.close();
+                connected = false;
+                if (null != currentReply) {
+                    currentReply.success(false);
+                    currentReply = null;
+                }
+//                gatt.close();
+                disconnect();
             }
             MyMethodRouter.me().callOnDeviceStateChange(device.getAddress(), newState);
         }
@@ -155,7 +161,9 @@ final class MyBluetoothDevice {
 
         if (null != gatt1) {
             // 可能之前建立连接未成功，也未释放资源，先释放资源，再重新连接。
-            this.disconnect();
+            gatt1.disconnect();
+            gatt1.close();
+            gatt1 = null;
         }
 
         this.currentReply = reply;
@@ -319,15 +327,15 @@ final class MyBluetoothDevice {
         int _connectionState = MyBluetoothManager.me().getConnectionState(this.device);
         boolean _isDisconnected = (BluetoothProfile.STATE_DISCONNECTED == _connectionState);
         MyLog.debug("device {} isDisconnected ? {}", this.device, _isDisconnected);
-        if (_isDisconnected) {
-            MyLog.debug("device {} close gatt.", this.device);
-            try {
-                gatt1.close();
-            } catch (Exception e) {
-                MyLog.warn("device {} close gatt error: {}", this.device, e.getMessage());
-            }
-        }
-        gatt1 = null;
+//        if (_isDisconnected) {
+//            MyLog.debug("device {} close gatt.", this.device);
+//            try {
+//                gatt1.close();
+//            } catch (Exception e) {
+//                MyLog.warn("device {} close gatt error: {}", this.device, e.getMessage());
+//            }
+//        }
+//        gatt1 = null;
         return true;
     }
 

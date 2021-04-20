@@ -19,6 +19,8 @@ UIKIT_EXTERN NSString *const BluetoothConstantsKeyMsg;
 UIKIT_EXTERN NSString *const BluetoothConstantsKeyData;
 /// 设备id
 UIKIT_EXTERN NSString *const BluetoothConstantsKeyDeviceId;
+/// 蓝牙服务id
+UIKIT_EXTERN NSString *const BluetoothConstantsKeyServiceId;
 /// 设备名称
 UIKIT_EXTERN NSString *const BluetoothConstantsKeyDeviceName;
 /// 设备状态
