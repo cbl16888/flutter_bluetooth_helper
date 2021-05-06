@@ -27,7 +27,9 @@ final class MyBluetoothDevice {
     Map<String, BluetoothGattCharacteristic> characteristicMap = new HashMap<>(16, 1.0f);
 
     // 当前回复对象
-    IReply currentReply = null;
+    IReply _connectReply = null;
+    IReply _requestMtuReply = null;
+    IReply _discoverServicesReply = null;
 
     final BluetoothDevice device;
     final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
@@ -35,27 +37,27 @@ final class MyBluetoothDevice {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             MyLog.debug("onConnectionStateChange status: {}, newState: {}, gatt: {}, gatt1: {}", status, newState, gatt, gatt1);
-            MyHandler.me().removeCallback(MyHandler.ID_CONNECT_TIMEOUT);
             if (BluetoothProfile.STATE_CONNECTED == newState) {
+                MyHandler.me().removeCallback(MyHandler.ID_CONNECT_TIMEOUT);
                 connected = true;
-                if (null != currentReply) {
-                    currentReply.success(true);
-                    currentReply = null;
+                if (null != _connectReply) {
+                    _connectReply.success(true);
+                    _connectReply = null;
                 }
             } else if (BluetoothProfile.STATE_DISCONNECTED == newState) {
                 connected = false;
-                if (null != currentReply) {
-                    currentReply.success(false);
-                    currentReply = null;
+                if (null != _connectReply) {
+                    _connectReply.success(false);
+                    _connectReply = null;
                 }
 //                // 释放资源
                 disconnect();
 //                gatt.close();
             } else if (status != 0) {
                 connected = false;
-                if (null != currentReply) {
-                    currentReply.success(false);
-                    currentReply = null;
+                if (null != _connectReply) {
+                    _connectReply.success(false);
+                    _connectReply = null;
                 }
 //                gatt.close();
                 disconnect();
@@ -80,9 +82,9 @@ final class MyBluetoothDevice {
                 }
                 MyHandler.me().removeCallback(MyHandler.ID_DISCOVER_SERVICES_TIMEOUT);
                 List<String> _resultData = new ArrayList<>(characteristicMap.keySet());
-                if (null != currentReply) {
-                    currentReply.success(_resultData);
-                    currentReply = null;
+                if (null != _discoverServicesReply) {
+                    _discoverServicesReply.success(_resultData);
+                    _discoverServicesReply = null;
                 } else {
                     MyMethodRouter.me().callOnServicesDiscovered(device.getAddress(), _resultData);
                 }
@@ -124,9 +126,9 @@ final class MyBluetoothDevice {
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
-            if (null != currentReply) {
-                currentReply.success(true);
-                currentReply = null;
+            if (null != _requestMtuReply) {
+                _requestMtuReply.success(true);
+                _requestMtuReply = null;
             }
         }
     };
@@ -148,11 +150,17 @@ final class MyBluetoothDevice {
 //        MyLog.debug("isConnected:" + _isConnected);
         if (this.connected) {
             MyLog.debug("already connected!");
+            if (null != this._connectReply) {
+                _connectReply.success(true);
+                _connectReply = null;
+            }
             return;
         }
 
-        if (null != this.currentReply) {
+        if (null != this._connectReply) {
             MyLog.debug("please wait for another task to complete.");
+            _connectReply.success(false);
+            _connectReply = null;
             return;
         }
 
@@ -166,7 +174,7 @@ final class MyBluetoothDevice {
             gatt1 = null;
         }
 
-        this.currentReply = reply;
+        this._connectReply = reply;
 
         if (PlatformHelper.sdkGE23()) {
             gatt1 = this.device.connectGatt(PlatformHelper.me().getActivity(), false, this.gattCallback, BluetoothDevice.TRANSPORT_LE);
@@ -177,9 +185,9 @@ final class MyBluetoothDevice {
         MyHandler.me().delayed(MyHandler.ID_CONNECT_TIMEOUT, timeout * 1000, new ICallback() {
             @Override
             public void execute(Object args) {
-                if (null != currentReply) {
-                    currentReply.success(false);
-                    currentReply = null;
+                if (null != _connectReply) {
+                    _connectReply.success(false);
+                    _connectReply = null;
                 }
                 disconnect();
             }
@@ -200,8 +208,10 @@ final class MyBluetoothDevice {
      * @param reply   回复对象
      */
     void requestMtu(int desiredMtu, IReply reply) {
-        if (null != this.currentReply) {
+        if (null != this._requestMtuReply) {
             MyLog.debug("please wait for another task to complete.");
+            _requestMtuReply.success(false);
+            _requestMtuReply = null;
             return;
         }
         if (!this.connected) {
@@ -209,11 +219,11 @@ final class MyBluetoothDevice {
             reply.error(MyBluetoothException.CODE_CONNECT_FIRST, "please connect first!");
             return;
         }
-        this.currentReply = reply;
+        this._requestMtuReply = reply;
         boolean isSuccess = gatt1.requestMtu(desiredMtu);
-        if (null != currentReply && !isSuccess) {
-            currentReply.success(false);
-            currentReply = null;
+        if (null != _requestMtuReply && !isSuccess) {
+            _requestMtuReply.success(false);
+            _requestMtuReply = null;
         }
     }
 
@@ -224,8 +234,10 @@ final class MyBluetoothDevice {
      * @param reply   回复对象
      */
     void discoverServices(int timeout, IReply reply) {
-        if (null != this.currentReply) {
+        if (null != this._discoverServicesReply) {
             MyLog.debug("please wait for another task to complete.");
+            _discoverServicesReply.error("timeout");
+            _discoverServicesReply = null;
             return;
         }
         if (!this.connected) {
@@ -233,16 +245,16 @@ final class MyBluetoothDevice {
             reply.error(MyBluetoothException.CODE_CONNECT_FIRST, "please connect first!");
             return;
         }
-        this.currentReply = reply;
+        this._discoverServicesReply = reply;
         this.characteristicMap.clear();
         gatt1.discoverServices();
 
         MyHandler.me().delayed(MyHandler.ID_DISCOVER_SERVICES_TIMEOUT, timeout * 1000, new ICallback() {
             @Override
             public void execute(Object args) {
-                if (null != currentReply) {
-                    currentReply.error("timeout");
-                    currentReply = null;
+                if (null != _discoverServicesReply) {
+                    _discoverServicesReply.error("timeout");
+                    _discoverServicesReply = null;
                 }
             }
         });
@@ -316,8 +328,15 @@ final class MyBluetoothDevice {
      */
     boolean disconnect() {
         this.connected = false;
-        this.currentReply = null;
-        MyHandler.me().removeCallback(MyHandler.ID_CONNECT_TIMEOUT);
+        this._requestMtuReply = null;
+        if (null != _connectReply) {
+            MyHandler.me().removeCallback(MyHandler.ID_CONNECT_TIMEOUT);
+        }
+        _connectReply = null;
+        if (null != _discoverServicesReply) {
+            MyHandler.me().removeCallback(MyHandler.ID_DISCOVER_SERVICES_TIMEOUT);
+        }
+        _discoverServicesReply = null;
         if (null == gatt1) {
             MyLog.debug("device {} already disconnected.", this.device);
             return false;
