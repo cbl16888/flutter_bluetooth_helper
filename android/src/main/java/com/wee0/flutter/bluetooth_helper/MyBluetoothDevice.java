@@ -150,9 +150,8 @@ final class MyBluetoothDevice {
 //        MyLog.debug("isConnected:" + _isConnected);
         if (this.connected) {
             MyLog.debug("already connected!");
-            if (null != this._connectReply) {
-                _connectReply.success(true);
-                _connectReply = null;
+            if (null != reply) {
+                reply.success(true);
             }
             return;
         }
@@ -161,6 +160,9 @@ final class MyBluetoothDevice {
             MyLog.debug("please wait for another task to complete.");
             _connectReply.success(false);
             _connectReply = null;
+            if (null != reply) {
+                reply.success(false);
+            }
             return;
         }
 
